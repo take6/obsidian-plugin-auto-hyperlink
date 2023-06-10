@@ -24,6 +24,15 @@ export default class MyPlugin extends Plugin {
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
+		// Add another icon - This creates an icon in the left ribbon.
+		const birdIconEl = this.addRibbonIcon('bird', 'My Plugin', (evt: MouseEvent) => {
+			// Called when the user clicks the icon.
+			new Notice('ピーブー');
+		});
+		// Perform additional things with the ribbon
+		birdIconEl.addClass('my-plugin-ribbon-class');
+
+
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
