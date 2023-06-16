@@ -27,7 +27,7 @@ export default class MyPlugin extends Plugin {
 		// Add another icon - This creates an icon in the left ribbon.
 		const birdIconEl = this.addRibbonIcon('bird', 'My Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('ピーブー');
+			new Notice('Chirp Chirp! mySetting is ' + this.settings.mySetting);
 		});
 		// Perform additional things with the ribbon
 		birdIconEl.addClass('my-plugin-ribbon-class');
