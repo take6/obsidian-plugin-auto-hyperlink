@@ -16,6 +16,51 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+        let converter = [
+            {
+                "pattern": "Obsidian",
+                "linkto": "obsidian.md"
+            }
+        ];
+
+        // post processing to insert external link
+        this.registerMarkdownPostProcessor((element, context) => {
+            console.log(element);
+            console.log(context);
+
+            for (let i = 0; i < converter.length; ++i) {
+                const pattern = converter[i]["pattern"];
+                let regexStr = "^\(.*\)\(" + pattern + "\)\(.*\)$";
+                const regex = new RegExp(regexStr);
+                const linkto = converter[i]["linkto"];
+
+                const paragraphs = element.querySelectorAll("p, li");
+                console.log("found " + paragraphs.length + " elements");
+                for (let index = 0; index < paragraphs.length; ++index) {
+                    const par = paragraphs[index];
+                    const txt = par.textContent;
+                    if (par.textContent) {
+                        let match = par.textContent && par.textContent.match(regex);
+                        console.log("index " + index + ": " + par.textContent + " (" + match + ")");
+                        if (match) {
+                            let a = document.createElement('a');
+                            a.textContent = match[2]
+                            a.setAttribute('href', "http://" + linkto);
+                            if (match[1]) {
+                                par.textContent = match[1];
+                            } else {
+                                par.textContent = '';
+                            }
+                            par.append(a);
+                            if (match[3]) {
+                                par.append(document.createTextNode(match[3]));
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
