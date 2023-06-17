@@ -39,21 +39,27 @@ export default class MyPlugin extends Plugin {
                 for (let index = 0; index < paragraphs.length; ++index) {
                     const par = paragraphs[index];
                     const txt = par.textContent;
-                    if (par.textContent) {
-                        let match = par.textContent && par.textContent.match(regex);
-                        console.log("index " + index + ": " + par.textContent + " (" + match + ")");
+                    console.log("Processing ", par);
+                    console.log(par.childNodes);
+                    console.log(txt);
+                    for (let c of par.childNodes) {
+                        console.log("children: ", c, c.nodeName, " tagName: ", c.tagName, " ", c.textContent);
+                        if (c.nodeName == "#text") {
+                            console.log("This is text node");
+                            let match = c.textContent.match(regex);
                         if (match) {
                             let a = document.createElement('a');
-                            a.textContent = match[2]
+                                a.textContent = match[2];
                             a.setAttribute('href', "http://" + linkto);
                             if (match[1]) {
-                                par.textContent = match[1];
+                                    c.textContent = match[1];
                             } else {
-                                par.textContent = '';
+                                    c.textContent = '';
                             }
-                            par.append(a);
+                                par.insertBefore(a, c.nextSigling);
                             if (match[3]) {
-                                par.append(document.createTextNode(match[3]));
+                                    par.insertBefore(document.createTextNode(match[3]), a.nextSibling);
+                                }
                             }
                         }
                     }
