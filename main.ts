@@ -16,79 +16,81 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-        let converter = [
+        let converterList = [
             {
                 "pattern": "Obsidian",
                 "linkto": "obsidian.md"
+            },
+            {
+                "pattern": "Google",
+                "linkto": "google.com"
             }
         ];
 
-        let applyConverter = (element: Text) => {
+        let applyConverter = (element: Text, converter: Object) => {
             console.log("applyConverter");
             if (!element.textContent) {
                 return;
             }
 
             let parent = element.parentElement;
-            for (let i = 0; i < converter.length; ++i) {
-                const pattern = converter[i]["pattern"];
-                // let regexStr = "^\(.*\)\(" + pattern + "\)\(.*\)$";
-                let regexStr = pattern;
-                const regex = new RegExp(regexStr, 'g');
-                // const regex = new RegExp(regexStr);
-                const linkto = converter[i]["linkto"];
-                // let match = element.textContent.match(regex);
-                // let match = regex.exec(element.textContent);
-                let txt = element.textContent;
-                let matches = txt.matchAll(regex);
-                let txtStartIndex = 0;
-                let converted = new Array<HTMLElement>();
-                for (const match of matches) {
-                    console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length);
-                            let a = document.createElement('a');
-                    a.textContent = match[0];
-                            a.setAttribute('href', "http://" + linkto);
-                    if (txtStartIndex < match.index) {
-                        const substr = txt.substring(txtStartIndex, match.index);
-                        converted = converted.concat(document.createTextNode(substr));
-                    }
-                    converted = converted.concat(a);
-                    txtStartIndex = match.index + match[0].length;
+            const pattern = converter["pattern"];
+            // let regexStr = "^\(.*\)\(" + pattern + "\)\(.*\)$";
+            let regexStr = pattern;
+            const regex = new RegExp(regexStr, 'g');
+            // const regex = new RegExp(regexStr);
+            const linkto = converter["linkto"];
+            // let match = element.textContent.match(regex);
+            // let match = regex.exec(element.textContent);
+            let txt = element.textContent;
+            let matches = txt.matchAll(regex);
+            let txtStartIndex = 0;
+            let converted = new Array<HTMLElement>();
+            for (const match of matches) {
+                console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length);
+                let a = document.createElement('a');
+                a.textContent = match[0];
+                a.setAttribute('href', "http://" + linkto);
+                if (txtStartIndex < match.index) {
+                    const substr = txt.substring(txtStartIndex, match.index);
+                    converted = converted.concat(document.createTextNode(substr));
                 }
-                console.log("converted = ", converted);
-                if (converted.length > 0) {
-                    if (txtStartIndex < txt.length) {
-                        const substr = txt.substring(txtStartIndex, txt.length);
-                        console.log("tail = ", substr);
-                        element.textContent = substr;
-                            } else {
-                        element.textContent = "";
-                            }
-                    for (let x of converted) {
-                        console.log("inserting ", x);
-                        parent?.insertBefore(x, element);
-                                }
-                            }
-                        }
+                converted = converted.concat(a);
+                txtStartIndex = match.index + match[0].length;
+            }
+            console.log("converted = ", converted);
+            if (converted.length > 0) {
+                if (txtStartIndex < txt.length) {
+                    const substr = txt.substring(txtStartIndex, txt.length);
+                    console.log("tail = ", substr);
+                    element.textContent = substr;
+                } else {
+                    element.textContent = "";
+                }
+                for (let x of converted) {
+                    console.log("inserting ", x);
+                    parent?.insertBefore(x, element);
+                }
+            }
         };
 
-        let recursiveApply = (element: HTMLElement) => {
+        let recursiveApply = (element: HTMLElement, converter: Object) => {
             console.log("recursiveApply");
             console.log("element.nodeName = ", element.nodeName);
             const ignoreNodeList = ["A", "PRE"];
             if (element.nodeName == "A" || element.nodeName == "PRE") {
                 console.log("ignoring ", element.nodeName);
                 return;
-                    }
+            }
 
             for (let child of element.childNodes) {
                 console.log("  Apply converter to child", child.nodeName);
                 if (child.nodeName == "#text") {
                     // apply converter and continue
-                    applyConverter(child);
+                    applyConverter(child, converter);
                     continue;
                 } else {
-                    recursiveApply(child);
+                    recursiveApply(child, converter);
                 }
             }
         };
@@ -98,7 +100,9 @@ export default class MyPlugin extends Plugin {
             console.log("Processing element", element);
             console.log("context = ", context);
 
-            recursiveApply(element);
+            for (let converter of converterList) {
+                recursiveApply(element, converter);
+            }
         });
 
 		// This creates an icon in the left ribbon.
