@@ -23,48 +23,82 @@ export default class MyPlugin extends Plugin {
             }
         ];
 
-        // post processing to insert external link
-        this.registerMarkdownPostProcessor((element, context) => {
-            console.log(element);
-            console.log(context);
+        let applyConverter = (element: Text) => {
+            console.log("applyConverter");
+            if (!element.textContent) {
+                return;
+            }
 
+            let parent = element.parentElement;
             for (let i = 0; i < converter.length; ++i) {
                 const pattern = converter[i]["pattern"];
-                let regexStr = "^\(.*\)\(" + pattern + "\)\(.*\)$";
-                const regex = new RegExp(regexStr);
+                // let regexStr = "^\(.*\)\(" + pattern + "\)\(.*\)$";
+                let regexStr = pattern;
+                const regex = new RegExp(regexStr, 'g');
+                // const regex = new RegExp(regexStr);
                 const linkto = converter[i]["linkto"];
-
-                const paragraphs = element.querySelectorAll("p, li");
-                console.log("found " + paragraphs.length + " elements");
-                for (let index = 0; index < paragraphs.length; ++index) {
-                    const par = paragraphs[index];
-                    const txt = par.textContent;
-                    console.log("Processing ", par);
-                    console.log(par.childNodes);
-                    console.log(txt);
-                    for (let c of par.childNodes) {
-                        console.log("children: ", c, c.nodeName, " tagName: ", c.tagName, " ", c.textContent);
-                        if (c.nodeName == "#text") {
-                            console.log("This is text node");
-                            let match = c.textContent.match(regex);
-                        if (match) {
+                // let match = element.textContent.match(regex);
+                // let match = regex.exec(element.textContent);
+                let txt = element.textContent;
+                let matches = txt.matchAll(regex);
+                let txtStartIndex = 0;
+                let converted = new Array<HTMLElement>();
+                for (const match of matches) {
+                    console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length);
                             let a = document.createElement('a');
-                                a.textContent = match[2];
+                    a.textContent = match[0];
                             a.setAttribute('href', "http://" + linkto);
-                            if (match[1]) {
-                                    c.textContent = match[1];
+                    if (txtStartIndex < match.index) {
+                        const substr = txt.substring(txtStartIndex, match.index);
+                        converted = converted.concat(document.createTextNode(substr));
+                    }
+                    converted = converted.concat(a);
+                    txtStartIndex = match.index + match[0].length;
+                }
+                console.log("converted = ", converted);
+                if (converted.length > 0) {
+                    if (txtStartIndex < txt.length) {
+                        const substr = txt.substring(txtStartIndex, txt.length);
+                        console.log("tail = ", substr);
+                        element.textContent = substr;
                             } else {
-                                    c.textContent = '';
+                        element.textContent = "";
                             }
-                                par.insertBefore(a, c.nextSigling);
-                            if (match[3]) {
-                                    par.insertBefore(document.createTextNode(match[3]), a.nextSibling);
+                    for (let x of converted) {
+                        console.log("inserting ", x);
+                        parent?.insertBefore(x, element);
                                 }
                             }
                         }
+        };
+
+        let recursiveApply = (element: HTMLElement) => {
+            console.log("recursiveApply");
+            console.log("element.nodeName = ", element.nodeName);
+            const ignoreNodeList = ["A", "PRE"];
+            if (element.nodeName == "A" || element.nodeName == "PRE") {
+                console.log("ignoring ", element.nodeName);
+                return;
                     }
+
+            for (let child of element.childNodes) {
+                console.log("  Apply converter to child", child.nodeName);
+                if (child.nodeName == "#text") {
+                    // apply converter and continue
+                    applyConverter(child);
+                    continue;
+                } else {
+                    recursiveApply(child);
                 }
             }
+        };
+
+        // post processing to insert external link
+        this.registerMarkdownPostProcessor((element, context) => {
+            console.log("Processing element", element);
+            console.log("context = ", context);
+
+            recursiveApply(element);
         });
 
 		// This creates an icon in the left ribbon.
