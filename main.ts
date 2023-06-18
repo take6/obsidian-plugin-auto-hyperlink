@@ -26,13 +26,9 @@ export default class MyPlugin extends Plugin {
 
             let parent = element.parentElement;
             const pattern = converter["pattern"];
-            // let regexStr = "^\(.*\)\(" + pattern + "\)\(.*\)$";
             let regexStr = pattern;
             const regex = new RegExp(regexStr, 'g');
-            // const regex = new RegExp(regexStr);
             const linkto = converter["linkto"];
-            // let match = element.textContent.match(regex);
-            // let match = regex.exec(element.textContent);
             let txt = element.textContent;
             let matches = txt.matchAll(regex);
             let txtStartIndex = 0;
@@ -235,18 +231,7 @@ class SampleSettingTab extends PluginSettingTab {
                 .setPlaceholder('[\n  {"pattern": "Obsidian",\n  "linkto": "obsidian.md"}\n]')
                 .onChange(async (value) => {
                     console.log('mapperList JSON: ', value);
-                    // this.plugin.settings.mapperList = value;
-                    // hard code mapping for now
-                    this.plugin.settings.mapperList = '[\n' +
-                    '  {\n' +
-                    '    "pattern": "Obsidian",\n' +
-                    '    "linkto": "obsidian.md"\n' +
-                    '  },\n' +
-                    '  {\n' +
-                    '    "pattern": "Google",\n' +
-                    '    "linkto": "google.com"\n' +
-                    '  }\n' +
-                    ']';
+                    this.plugin.settings.mapperList = value;
                     try {
                         JSON.parse(this.plugin.settings.mapperList);
                     } catch (error) {
