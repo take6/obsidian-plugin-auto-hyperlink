@@ -1,13 +1,15 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
 	mySetting: string;
+    mapperList: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+	mySetting: 'default',
+    mapperList: '[]'
 }
 
 export default class MyPlugin extends Plugin {
@@ -15,17 +17,6 @@ export default class MyPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-
-        let converterList = [
-            {
-                "pattern": "Obsidian",
-                "linkto": "obsidian.md"
-            },
-            {
-                "pattern": "Google",
-                "linkto": "google.com"
-            }
-        ];
 
         let applyConverter = (element: Text, converter: Object) => {
             console.log("applyConverter");
@@ -100,6 +91,9 @@ export default class MyPlugin extends Plugin {
             console.log("Processing element", element);
             console.log("context = ", context);
 
+            console.log(this.settings.mapperList);
+            const converterList = JSON.parse(this.settings.mapperList);
+
             for (let converter of converterList) {
                 recursiveApply(element, converter);
             }
@@ -116,7 +110,7 @@ export default class MyPlugin extends Plugin {
 		// Add another icon - This creates an icon in the left ribbon.
 		const birdIconEl = this.addRibbonIcon('bird', 'My Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('Chirp Chirp! mySetting is ' + this.settings.mySetting);
+			new Notice('Chirp Chirp! mySetting is ' + this.settings.mapperList);
 		});
 		// Perform additional things with the ribbon
 		birdIconEl.addClass('my-plugin-ribbon-class');
@@ -231,5 +225,36 @@ class SampleSettingTab extends PluginSettingTab {
 					this.plugin.settings.mySetting = value;
 					await this.plugin.saveSettings();
 				}));
-	}
+        new Setting(containerEl)
+            .setName('Mapping')
+            .addButton(bc => bc
+                .setButtonText('Test')
+                )
+            .setDesc('String must be JSON containing list of items having "pattern" and "linkto" fields')
+            .addTextArea(textArea => textArea
+                .setPlaceholder('[\n  {"pattern": "Obsidian",\n  "linkto": "obsidian.md"}\n]')
+                .onChange(async (value) => {
+                    console.log('mapperList JSON: ', value);
+                    // this.plugin.settings.mapperList = value;
+                    // hard code mapping for now
+                    this.plugin.settings.mapperList = '[\n' +
+                    '  {\n' +
+                    '    "pattern": "Obsidian",\n' +
+                    '    "linkto": "obsidian.md"\n' +
+                    '  },\n' +
+                    '  {\n' +
+                    '    "pattern": "Google",\n' +
+                    '    "linkto": "google.com"\n' +
+                    '  }\n' +
+                    ']';
+                    try {
+                        JSON.parse(this.plugin.settings.mapperList);
+                    } catch (error) {
+                        console.warn('JSON parse error. Falling back to default setting.');
+                        this.plugin.settings.mapperList = DEFAULT_SETTINGS.mapperList;
+                    }
+                    await this.plugin.saveSettings();
+                })
+                );
+        }
 }
