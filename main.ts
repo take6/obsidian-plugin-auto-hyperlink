@@ -226,9 +226,14 @@ class SampleSettingTab extends PluginSettingTab {
             .addButton(bc => bc
                 .setButtonText('Test')
                 )
-            .setDesc('String must be JSON containing list of items having "pattern" and "linkto" fields')
-            .addTextArea(textArea => textArea
-                .setPlaceholder('[\n  {"pattern": "Obsidian",\n  "linkto": "obsidian.md"}\n]')
+            .addTextArea(textArea => {
+                const currentValue = this.plugin.settings.mapperList;
+                if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.mapperList) {
+                    textArea.setPlaceholder('[\n  {"pattern": "Obsidian",\n  "linkto": "obsidian.md"}\n]');
+                } else {
+                    textArea.setValue(currentValue);
+                }
+                return textArea
                 .onChange(async (value) => {
                     console.log('mapperList JSON: ', value);
                     this.plugin.settings.mapperList = value;
@@ -239,7 +244,7 @@ class SampleSettingTab extends PluginSettingTab {
                         this.plugin.settings.mapperList = DEFAULT_SETTINGS.mapperList;
                     }
                     await this.plugin.saveSettings();
-                })
+                });}
                 );
         }
 }
