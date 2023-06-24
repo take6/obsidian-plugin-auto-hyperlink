@@ -18,17 +18,15 @@ export default class MyPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-        let applyConverter = (element: Text, converter: Object) => {
+        let applyConverter = (element: Text, pattern: string, urlTemplate: string) => {
             console.log("applyConverter");
             if (!element.textContent) {
                 return;
             }
 
             let parent = element.parentElement;
-            const pattern = converter["pattern"];
             let regexStr = pattern;
             const regex = new RegExp(regexStr, 'g');
-            const linkto = converter["linkto"];
             let txt = element.textContent;
             let matches = txt.matchAll(regex);
             let txtStartIndex = 0;
@@ -37,7 +35,7 @@ export default class MyPlugin extends Plugin {
                 console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length);
                 let a = document.createElement('a');
                 a.textContent = match[0];
-                a.setAttribute('href', "http://" + linkto);
+                a.setAttribute('href', "http://" + urlTemplate);
                 if (txtStartIndex < match.index) {
                     const substr = txt.substring(txtStartIndex, match.index);
                     converted = converted.concat(document.createTextNode(substr));
@@ -61,7 +59,7 @@ export default class MyPlugin extends Plugin {
             }
         };
 
-        let recursiveApply = (element: HTMLElement, converter: Object) => {
+        let recursiveApply = (element: HTMLElement, pattern: string, urlTemplate: string) => {
             console.log("recursiveApply");
             console.log("element.nodeName = ", element.nodeName);
             const ignoreNodeList = ["A", "PRE"];
@@ -74,10 +72,10 @@ export default class MyPlugin extends Plugin {
                 console.log("  Apply converter to child", child.nodeName);
                 if (child.nodeName == "#text") {
                     // apply converter and continue
-                    applyConverter(child, converter);
+                    applyConverter(child, pattern, urlTemplate);
                     continue;
                 } else {
-                    recursiveApply(child, converter);
+                    recursiveApply(child, pattern, urlTemplate);
                 }
             }
         };
@@ -90,8 +88,10 @@ export default class MyPlugin extends Plugin {
             console.log(this.settings.mapperList);
             const converterList = JSON.parse(this.settings.mapperList);
 
-            for (let converter of converterList) {
-                recursiveApply(element, converter);
+            for (const pattern of Object.keys(converterList)) {
+                // const pattern = converter["pattern"];
+                const urlTemplate = converterList[pattern];
+                recursiveApply(element, pattern, urlTemplate);
             }
         });
 
@@ -212,11 +212,11 @@ class SampleSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Mapping')
-            .setDesc('String must be JSON containing list of items having "pattern" and "linkto" fields')
+            .setDesc('String must be JSON of "pattern":"urlTemplate" pairs')
             .addTextArea(textArea => {
                 const currentValue = this.plugin.settings.mapperList;
                 if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.mapperList) {
-                    textArea.setPlaceholder('[\n  {"pattern": "Obsidian",\n  "linkto": "obsidian.md"}\n]');
+                    textArea.setPlaceholder('{"Obsidian": "obsidian.md"}');
                 } else {
                     textArea.setValue(currentValue);
                 }
