@@ -210,22 +210,9 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					console.log('Secret: ' + value);
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
         new Setting(containerEl)
             .setName('Mapping')
-            .addButton(bc => bc
-                .setButtonText('Test')
-                )
+            .setDesc('String must be JSON containing list of items having "pattern" and "linkto" fields')
             .addTextArea(textArea => {
                 const currentValue = this.plugin.settings.mapperList;
                 if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.mapperList) {
@@ -246,5 +233,5 @@ class SampleSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 });}
                 );
-        }
+    }
 }
