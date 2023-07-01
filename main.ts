@@ -32,10 +32,16 @@ export default class MyPlugin extends Plugin {
             let txtStartIndex = 0;
             let converted = new Array<HTMLElement>();
             for (const match of matches) {
-                console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length);
+                console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length, "match.length = ", match.length);
                 let a = document.createElement('a');
                 a.textContent = match[0];
-                a.setAttribute('href', "http://" + urlTemplate);
+                let url = urlTemplate;
+                for (let i = 0; i < match.length ; ++i) {
+                    let x = "$" + i.toString();
+                    url = url.replace(x, match[i]);
+                    console.log("i = ", i, ", x = ", x, ", url=\"", url, "\"");
+                }
+                a.setAttribute('href', "https://" + url);
                 if (txtStartIndex < match.index) {
                     const substr = txt.substring(txtStartIndex, match.index);
                     converted = converted.concat(document.createTextNode(substr));
@@ -106,7 +112,7 @@ export default class MyPlugin extends Plugin {
 		// Add another icon - This creates an icon in the left ribbon.
 		const birdIconEl = this.addRibbonIcon('bird', 'My Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('Chirp Chirp! mySetting is ' + this.settings.mapperList);
+			new Notice('Chirp Chirp! mySetting is \n' + this.settings.mapperList);
 		});
 		// Perform additional things with the ribbon
 		birdIconEl.addClass('my-plugin-ribbon-class');
@@ -212,7 +218,11 @@ class SampleSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Mapping')
-            .setDesc('String must be JSON of "pattern":"urlTemplate" pairs')
+            .setDesc(
+                'String must be JSON of "pattern":"urlTemplate" pairs, ' +
+                'where urlTemplate can contain placeholder "$0" to embed ' +
+                'matched string into url.'
+            )
             .addTextArea(textArea => {
                 const currentValue = this.plugin.settings.mapperList;
                 if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.mapperList) {
