@@ -2,18 +2,18 @@ import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, Plug
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
+interface AutoHyperlinkSettings {
 	mySetting: string;
-    mapperList: string;
+    rule: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: AutoHyperlinkSettings = {
 	mySetting: 'default',
-    mapperList: '[]'
+    rule: '[]'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class AutoHyperlinkPlugin extends Plugin {
+	settings: AutoHyperlinkSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -95,8 +95,8 @@ export default class MyPlugin extends Plugin {
             console.log("Processing element", element);
             console.log("context = ", context);
 
-            console.log(this.settings.mapperList);
-            const converterList = JSON.parse(this.settings.mapperList);
+            console.log(this.settings.rule);
+            const converterList = JSON.parse(this.settings.rule);
 
             for (const pattern of Object.keys(converterList)) {
                 // const pattern = converter["pattern"];
@@ -105,18 +105,10 @@ export default class MyPlugin extends Plugin {
             }
         });
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
-
 		// Add another icon - This creates an icon in the left ribbon.
-		const birdIconEl = this.addRibbonIcon('bird', 'My Plugin', (evt: MouseEvent) => {
+		const birdIconEl = this.addRibbonIcon('bird', 'AutoHyperlinkPlugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('Chirp Chirp! mySetting is \n' + this.settings.mapperList);
+			new Notice('Chirp Chirp! autolink rule is \n' + this.settings.rule);
 		});
 		// Perform additional things with the ribbon
 		birdIconEl.addClass('my-plugin-ribbon-class');
@@ -164,7 +156,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new AutoHyperlinkSettingTab(this.app, this));
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
@@ -205,10 +197,10 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class AutoHyperlinkSettingTab extends PluginSettingTab {
+	plugin: AugoHyperlinkPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: AutoHyperlinkPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -218,31 +210,31 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
+		containerEl.createEl('h2', {text: 'Setting for AutoHyperlink'});
 
         new Setting(containerEl)
-            .setName('Mapping')
+            .setName('Rule')
             .setDesc(
                 'String must be JSON of "pattern":"urlTemplate" pairs, ' +
-                'where urlTemplate can contain placeholder "$0" to embed ' +
-                'matched string into url.'
+                'where urlTemplate can contain placeholder such as "$0" ' +
+                'to embed matched string into url.'
             )
             .addTextArea(textArea => {
-                const currentValue = this.plugin.settings.mapperList;
-                if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.mapperList) {
+                const currentValue = this.plugin.settings.rule;
+                if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.rule) {
                     textArea.setPlaceholder('{"Obsidian": "obsidian.md"}');
                 } else {
                     textArea.setValue(currentValue);
                 }
                 return textArea
                 .onChange(async (value) => {
-                    console.log('mapperList JSON: ', value);
-                    this.plugin.settings.mapperList = value;
+                    console.log('rule JSON: ', value);
+                    this.plugin.settings.rule = value;
                     try {
-                        JSON.parse(this.plugin.settings.mapperList);
+                        JSON.parse(this.plugin.settings.rule);
                     } catch (error) {
                         console.warn('JSON parse error. Falling back to default setting.');
-                        this.plugin.settings.mapperList = DEFAULT_SETTINGS.mapperList;
+                        this.plugin.settings.rule = DEFAULT_SETTINGS.rule;
                     }
                     await this.plugin.saveSettings();
                 });}
