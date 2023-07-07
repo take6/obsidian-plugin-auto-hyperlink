@@ -1,95 +1,62 @@
-# Obsidian Sample Plugin
+## Auto Hyperlink Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+This plugin inserts hyperlink into reading view of Obsidian documents according to user-defined rule.
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+### Basic Usage
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+In the plugin setting pane, you can define hyperlink rule in the form of JSON. Its key should be a pattern that matches the words that you want to insert hyperlink. Corresponding value is a template for URL to be inserted. For example, the following rule will detect every words of "Obsidian" and insert a link to `https://github.com/obsidianmd`, which is almost equivalent to write `[Obsidian](https://github.com/obsidianmd)` in editing mode. If your document contains many "Obsidian"'s, this plugin automatically inserts a link to all of them - no manual linking, no omission.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
-
-## First time developing plugins?
-
-Quick starting guide for new plugin devs:
-
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
+```
 {
-    "fundingUrl": "https://buymeacoffee.com"
+    "Obsidian": "github.com/obsidianmd"
 }
 ```
 
-If you have multiple URLs, you can also do:
+If you omit `https://`, the plugin automatically prepend it. If you need to access the site with http (non-secure HTTP), the template have to start with `http://`.
 
-```json
+### Advanced Usage: Regex and Placeholder
+
+You can use regex (regular expression) for matching. Pattern string is given to [RegExp](https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/RegExp) to enable regex mathing. The following rule will detect all of "Obsidian" (capitalized) and "obsidian" (lower letter), insert a link to `https://obsidian.md`.
+
+```
 {
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
+    "[oO]bsidian": "obsidian.md"
 }
 ```
 
-## API Documentation
+JSON value can be a _template_ rather than direct URL. You can embed matched string using **placeholder**. The above rule is equivalent to the following.
 
-See https://github.com/obsidianmd/obsidian-api
+```
+{
+    "[oO]bsidian": "$0.md"
+}
+```
+
+In the template, `$0` is a placeholder that is replaced by matched pattern. Resulting URL will be `obsidian.md` or `Obsidian.md` depending on the matched string is either capitalized or in lower letter case (it seems that the latter URL is redirected to the former). You can use placeholders for subpattern as `$` with positive integer like `$1`. The following example uses subpattern to insert a link to GitHub pull requests.
+
+```
+{
+    "Obsidian PR (#[0-9]+)": "github.com/obsidianmd/obsidian-releases/pull/$1"
+}
+```
+
+When the pattern matches "Obsidian PR #10", `$0` corresponds to whole matched string while `$1` is replaced with the first subpattern enclosed by parenthesis, which is `10` in this case. So, resulting URL will be `https://github.com/obsidianmd/obsidian-releases/pull/10`
+
+### Multiple Rules
+
+You can define multiple rules by separating them with comma. Be careful about the ordering of rules. If multiple rules exist, **upper rule take priority**. If you have the following two rules, "obsidian" (lower letter) will be linked to `https://obsidian.md` but "Obsidian" (capitalized) will be linked to `https://github.com/obsidianmd` because upper rule takes priority.
+
+```
+{
+    "Obsidian": "github.com/obsidianmd",
+    "[oO]bsidian": "$0.md"
+}
+```
+
+
+### TODO
+
+- complete documentation
+- create demo PDF using Obsidian with above rules
+- license
+
