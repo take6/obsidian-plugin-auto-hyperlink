@@ -36,7 +36,7 @@ In the template, `$0` is a placeholder that is replaced by matched pattern. Resu
 
 ```
 {
-    "Obsidian PR (#[0-9]+)": "github.com/obsidianmd/obsidian-releases/pull/$1"
+    "Obsidian PR #([0-9]+)": "github.com/obsidianmd/obsidian-releases/pull/$1"
 }
 ```
 
