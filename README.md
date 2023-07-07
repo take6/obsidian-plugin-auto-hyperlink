@@ -53,6 +53,39 @@ You can define multiple rules by separating them with comma. Be careful about th
 }
 ```
 
+### Example
+
+This section demonstrates how plugin works.
+
+Suppose you have the following markdown text.
+
+```
+## Section: Obsidian
+
+Obsidian and obsidian, its public releases are hosted by GitHub. Obsidian PR #10 had been issued to add table-editor-obsidian plugin.
+
+- Auto Hyperlink inserts all occurrence of "Obsidian" or "obsidian" even in the list item
+```
+
+And you have hyperlink rule below.
+
+```
+{
+    "Obsidian PR #([0-9]+)": "github.com/obsidianmd/obsidian-releases/pull/$1",
+    "Obsidian": "github.com/obsidianmd",
+    "[oO]bsidian": "https://$0.md"
+}
+```
+
+When you switch to reading view, you will find that many links are inserted by the plugin. The link is also available in the [exported PDF file](./demo/Auto-Hyperlink-Demo.pdf).
+
+You can try it by yourself with the following procedure.
+
+1. install Auto Hyperlink plugin and enable it
+2. create new file, copy above markdown text
+3. open plugin setting, and copy above rule to the text area
+4. go back to newly created file, switch to reading view
+
 ### Author
 
 [@take6](https://github.com/take6)
