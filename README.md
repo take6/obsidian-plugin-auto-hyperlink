@@ -53,6 +53,10 @@ You can define multiple rules by separating them with comma. Be careful about th
 }
 ```
 
+### Author
+
+@take6
+
 
 ### TODO
 
