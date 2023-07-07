@@ -41,7 +41,11 @@ export default class MyPlugin extends Plugin {
                     url = url.replace(x, match[i]);
                     console.log("i = ", i, ", x = ", x, ", url=\"", url, "\"");
                 }
-                a.setAttribute('href', "https://" + url);
+                if (url.startsWith('https://') || url.startsWith('http://')) {
+                    a.setAttribute('href', url);
+                } else {
+                    a.setAttribute('href', "https://" + url);
+                }
                 if (txtStartIndex < match.index) {
                     const substr = txt.substring(txtStartIndex, match.index);
                     converted = converted.concat(document.createTextNode(substr));
