@@ -105,7 +105,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
             }
         });
 
-		// Add another icon - This creates an icon in the left ribbon.
+		// Plugin icon - show current rule when clicked
 		const birdIconEl = this.addRibbonIcon('bird', 'AutoHyperlinkPlugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new Notice('Chirp!\n Current autolink rule is \n' + this.settings.rule, 0);
