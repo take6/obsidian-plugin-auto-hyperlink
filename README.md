@@ -89,11 +89,3 @@ You can try it by yourself with the following procedure.
 ### Author
 
 [@take6](https://github.com/take6)
-
-
-### TODO
-
-- complete documentation
-- create demo PDF using Obsidian with above rules
-- license
-
