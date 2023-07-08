@@ -17,20 +17,24 @@ export default class AutoHyperlinkPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-        let applyRule = (element: Text, pattern: string, urlTemplate: string) => {
+        let applyRule = (node: Node, pattern: string, urlTemplate: string) => {
             console.debug("applyRule");
-            if (!element.textContent) {
+            if (!node.textContent) {
                 return;
             }
 
-            let parent = element.parentElement;
+            let parent = node.parentElement;
             let regexStr = pattern;
             const regex = new RegExp(regexStr, 'g');
-            let txt = element.textContent;
+            let txt = node.textContent;
             let matches = txt.matchAll(regex);
             let txtStartIndex = 0;
-            let converted = new Array<HTMLElement>();
+            let converted = new Array<Node>();
             for (const match of matches) {
+                if (match.index === undefined) {
+                    continue;
+                }
+
                 console.debug("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length, "match.length = ", match.length);
                 let a = document.createElement('a');
                 a.textContent = match[0];
@@ -57,36 +61,35 @@ export default class AutoHyperlinkPlugin extends Plugin {
                 if (txtStartIndex < txt.length) {
                     const substr = txt.substring(txtStartIndex, txt.length);
                     console.debug("tail = ", substr);
-                    element.textContent = substr;
+                    node.textContent = substr;
                 } else {
-                    element.textContent = "";
+                    node.textContent = "";
                 }
                 for (let x of converted) {
                     console.debug("inserting ", x);
-                    parent?.insertBefore(x, element);
+                    parent?.insertBefore(x, node);
                 }
             }
         };
 
-        let applyRecursive = (element: HTMLElement, pattern: string, urlTemplate: string) => {
+        let applyRecursive = (node: Node, pattern: string, urlTemplate: string) => {
             console.debug("applyRecursive");
-            console.debug("element.nodeName = ", element.nodeName);
+            console.debug("element.nodeName = ", node.nodeName);
             const ignoreNodeList = ["A", "PRE"];
-            if (element.nodeName == "A" || element.nodeName == "PRE") {
-                console.debug("ignoring ", element.nodeName);
+            if (node.nodeName == "A" || node.nodeName == "PRE") {
+                console.debug("ignoring ", node.nodeName);
                 return;
             }
 
-            for (let child of element.childNodes) {
+            node.childNodes.forEach((child) => {
                 console.debug("  Apply rule to child", child.nodeName);
                 if (child.nodeName == "#text") {
                     // apply converter and continue
                     applyRule(child, pattern, urlTemplate);
-                    continue;
                 } else {
                     applyRecursive(child, pattern, urlTemplate);
                 }
-            }
+            });
         };
 
         // post processing to insert external link
@@ -97,7 +100,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
             console.debug(this.settings.rule);
             const rules = JSON.parse(this.settings.rule);
 
-            for (const [pattern, urlTemplate] of Object.entries(rules)) {
+            for (const [pattern, urlTemplate] of Object.entries<string>(rules)) {
                 applyRecursive(element, pattern, urlTemplate);
             }
         });
@@ -161,7 +164,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                 } else {
                     textArea.setValue(currentValue);
                 }
-                return TextArea
+                return textArea
                     .onChange(async (value) => {
                         console.log('rule JSON: ', value);
                         this.plugin.settings.rule = value;
