@@ -1,11 +1,10 @@
 {
 	"id": "obsidian-plugin-auto-hyperlink",
 	"name": "Auto Hyperlink",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "Insert hyperlink according to the mapping instruction in JSON format",
+	"description": "Insert hyperlink according to user-defined rule",
 	"author": "take6",
 	"authorUrl": "https://github.com/take6",
-	"fundingUrl": "",
 	"isDesktopOnly": true
 }
