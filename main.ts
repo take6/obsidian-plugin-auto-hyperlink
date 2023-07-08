@@ -17,8 +17,8 @@ export default class AutoHyperlinkPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-        let applyConverter = (element: Text, pattern: string, urlTemplate: string) => {
-            console.log("applyConverter");
+        let applyRule = (element: Text, pattern: string, urlTemplate: string) => {
+            console.debug("applyRule");
             if (!element.textContent) {
                 return;
             }
@@ -31,14 +31,14 @@ export default class AutoHyperlinkPlugin extends Plugin {
             let txtStartIndex = 0;
             let converted = new Array<HTMLElement>();
             for (const match of matches) {
-                console.log("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length, "match.length = ", match.length);
+                console.debug("Found ", match[0], " start=", match.index, " end=", match.index + match[0].length, "match.length = ", match.length);
                 let a = document.createElement('a');
                 a.textContent = match[0];
                 let url = urlTemplate;
                 for (let i = 0; i < match.length ; ++i) {
                     let x = "$" + i.toString();
                     url = url.replace(x, match[i]);
-                    console.log("i = ", i, ", x = ", x, ", url=\"", url, "\"");
+                    console.debug("i = ", i, ", x = ", x, ", url=\"", url, "\"");
                 }
                 if (url.startsWith('https://') || url.startsWith('http://')) {
                     a.setAttribute('href', url);
@@ -52,25 +52,25 @@ export default class AutoHyperlinkPlugin extends Plugin {
                 converted = converted.concat(a);
                 txtStartIndex = match.index + match[0].length;
             }
-            console.log("converted = ", converted);
+            console.debug("converted = ", converted);
             if (converted.length > 0) {
                 if (txtStartIndex < txt.length) {
                     const substr = txt.substring(txtStartIndex, txt.length);
-                    console.log("tail = ", substr);
+                    console.debug("tail = ", substr);
                     element.textContent = substr;
                 } else {
                     element.textContent = "";
                 }
                 for (let x of converted) {
-                    console.log("inserting ", x);
+                    console.debug("inserting ", x);
                     parent?.insertBefore(x, element);
                 }
             }
         };
 
-        let recursiveApply = (element: HTMLElement, pattern: string, urlTemplate: string) => {
-            console.log("recursiveApply");
-            console.log("element.nodeName = ", element.nodeName);
+        let applyRecursive = (element: HTMLElement, pattern: string, urlTemplate: string) => {
+            console.debug("applyRecursive");
+            console.debug("element.nodeName = ", element.nodeName);
             const ignoreNodeList = ["A", "PRE"];
             if (element.nodeName == "A" || element.nodeName == "PRE") {
                 console.log("ignoring ", element.nodeName);
@@ -78,29 +78,27 @@ export default class AutoHyperlinkPlugin extends Plugin {
             }
 
             for (let child of element.childNodes) {
-                console.log("  Apply converter to child", child.nodeName);
+                console.debug("  Apply rule to child", child.nodeName);
                 if (child.nodeName == "#text") {
                     // apply converter and continue
-                    applyConverter(child, pattern, urlTemplate);
+                    applyRule(child, pattern, urlTemplate);
                     continue;
                 } else {
-                    recursiveApply(child, pattern, urlTemplate);
+                    applyRecursive(child, pattern, urlTemplate);
                 }
             }
         };
 
         // post processing to insert external link
         this.registerMarkdownPostProcessor((element, context) => {
-            console.log("Processing element", element);
-            console.log("context = ", context);
+            console.debug("Processing element", element);
+            console.debug("context = ", context);
 
-            console.log(this.settings.rule);
-            const converterList = JSON.parse(this.settings.rule);
+            console.debug(this.settings.rule);
+            const rules = JSON.parse(this.settings.rule);
 
-            for (const pattern of Object.keys(converterList)) {
-                // const pattern = converter["pattern"];
-                const urlTemplate = converterList[pattern];
-                recursiveApply(element, pattern, urlTemplate);
+            for (const [pattern, urlTemplate] of Object.entries(rules)) {
+                applyRecursive(element, pattern, urlTemplate);
             }
         });
 
