@@ -73,7 +73,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
             console.debug("element.nodeName = ", element.nodeName);
             const ignoreNodeList = ["A", "PRE"];
             if (element.nodeName == "A" || element.nodeName == "PRE") {
-                console.log("ignoring ", element.nodeName);
+                console.debug("ignoring ", element.nodeName);
                 return;
             }
 
