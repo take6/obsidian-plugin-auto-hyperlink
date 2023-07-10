@@ -1,6 +1,6 @@
 {
-	"name": "obsidian-plugin-auto-hyperlink",
-	"version": "0.1.4",
+	"name": "auto-hyperlink",
+	"version": "0.1.5",
 	"description": "Insert hyperlink according to user-defined rule",
 	"main": "main.js",
 	"scripts": {

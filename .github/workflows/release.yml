@@ -6,7 +6,7 @@ on:
       - "*"
 
 env:
-  PLUGIN_NAME: obsidian-plugin-auto-hyperlink
+  PLUGIN_NAME: auto-hyperlink
 
 jobs:
   build:
