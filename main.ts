@@ -103,12 +103,6 @@ export default class AutoHyperlinkPlugin extends Plugin {
             }
         });
 
-		// Plugin icon - show current rule when clicked
-		const birdIconEl = this.addRibbonIcon('bird', 'AutoHyperlinkPlugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('Chirp!\n Current autolink rule is \n' + this.settings.rule, 0);
-		});
-
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new AutoHyperlinkSettingTab(this.app, this));
 
