@@ -140,7 +140,8 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Setting for AutoHyperlink'});
+        // only use headings under settings if you have more than one section
+		// containerEl.createEl('h2', {text: 'Setting for AutoHyperlink'});
 
         new Setting(containerEl)
             .setName('Rule')
