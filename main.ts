@@ -2,12 +2,10 @@ import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, Plug
 
 
 interface AutoHyperlinkSettings {
-	mySetting: string;
     rule: string;
 }
 
 const DEFAULT_SETTINGS: AutoHyperlinkSettings = {
-	mySetting: 'default',
     rule: '[]'
 }
 
