@@ -129,6 +129,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
 
 class AutoHyperlinkSettingTab extends PluginSettingTab {
 	plugin: AutoHyperlinkPlugin;
+    timeoutId: any;
 
 	constructor(app: App, plugin: AutoHyperlinkPlugin) {
 		super(app, plugin);
@@ -157,17 +158,40 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                 } else {
                     textArea.setValue(currentValue);
                 }
+
+                let validate = async (value: string) => {
+                    // reset timeoutId
+                    this.timeoutId = undefined;
+
+                    console.log('rule JSON: ', value);
+                    this.plugin.settings.rule = value;
+                    try {
+                        JSON.parse(this.plugin.settings.rule);
+                    } catch (error) {
+                        console.warn('JSON parse error. Falling back to default setting.');
+                        this.plugin.settings.rule = DEFAULT_SETTINGS.rule;
+                    }
+                    await this.plugin.saveSettings();
+                }
+
+                // call validate when textArea becomes out of focus
+                textArea.inputEl.addEventListener('focusout', async (e) => {
+                    await validate(textArea.getValue());
+                })
+
                 return textArea
                     .onChange(async (value) => {
-                        console.log('rule JSON: ', value);
-                        this.plugin.settings.rule = value;
-                        try {
-                            JSON.parse(this.plugin.settings.rule);
-                        } catch (error) {
-                            console.warn('JSON parse error. Falling back to default setting.');
-                            this.plugin.settings.rule = DEFAULT_SETTINGS.rule;
+                        // validate input lazily so that validation
+                        // is not performed while user keeps typing
+                        const LAZY_INTERVAL = 500;  // msec
+                        if (!this.timeoutId) {
+                            console.log('register new validation');
+                            this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
+                        } else {
+                            console.log('renew validation interval');
+                            clearTimeout(this.timeoutId);
+                            this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
                         }
-                        await this.plugin.saveSettings();
                     });
             });
     }
