@@ -134,6 +134,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
 	constructor(app: App, plugin: AutoHyperlinkPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+        this.timeoutId = null;
 	}
 
 	display(): void {
@@ -161,7 +162,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
 
                 let validate = async (value: string) => {
                     // reset timeoutId
-                    this.timeoutId = undefined;
+                    this.timeoutId = null;
 
                     console.log('rule JSON: ', value);
                     this.plugin.settings.rule = value;
@@ -184,7 +185,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                         // validate input lazily so that validation
                         // is not performed while user keeps typing
                         const LAZY_INTERVAL = 500;  // msec
-                        if (!this.timeoutId) {
+                        if (this.timeoutId === null) {
                             console.log('register new validation');
                             this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
                         } else {
