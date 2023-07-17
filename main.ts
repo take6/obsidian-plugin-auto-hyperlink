@@ -145,14 +145,23 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
         // only use headings under settings if you have more than one section
 		// containerEl.createEl('h2', {text: 'Setting for AutoHyperlink'});
 
-        new Setting(containerEl)
+        let settingItem = new Setting(containerEl)
             .setName('Rule')
             .setDesc(
                 'String must be JSON of "pattern":"urlTemplate" pairs, ' +
                 'where urlTemplate can contain placeholder such as "$0" ' +
                 'to embed matched string into url.'
             )
-            .addTextArea(textArea => {
+
+        let warningItem = new Setting(containerEl)
+            .setDesc('');
+
+        warningItem.descEl.setAttribute(
+            'class',
+            warningItem.descEl.getAttribute('class') + ' json-parse-error'
+        );
+
+        settingItem.addTextArea(textArea => {
                 const currentValue = this.plugin.settings.rule;
                 if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.rule) {
                     textArea.setPlaceholder('{"Obsidian": "obsidian.md"}');
@@ -169,6 +178,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                     try {
                         JSON.parse(this.plugin.settings.rule);
                     } catch (error) {
+                        warningItem.descEl.setText('JSON parse error. Please fix your rule.');
                         console.warn('JSON parse error. Falling back to default setting.');
                         this.plugin.settings.rule = DEFAULT_SETTINGS.rule;
                     }
@@ -177,11 +187,14 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
 
                 // call validate when textArea becomes out of focus
                 textArea.inputEl.addEventListener('focusout', async (e) => {
+                    warningItem.setDesc('');
                     await validate(textArea.getValue());
-                })
+                });
 
                 return textArea
                     .onChange(async (value) => {
+                        warningItem.setDesc('');
+
                         // validate input lazily so that validation
                         // is not performed while user keeps typing
                         const LAZY_INTERVAL = 500;  // msec
