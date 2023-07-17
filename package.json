@@ -1,6 +1,6 @@
 {
 	"name": "auto-hyperlink",
-	"version": "0.1.5",
+	"version": "0.2.0",
 	"description": "Insert hyperlink according to user-defined rule",
 	"main": "main.js",
 	"scripts": {
