@@ -162,51 +162,51 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
         );
 
         settingItem.addTextArea(textArea => {
-                const currentValue = this.plugin.settings.rule;
-                if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.rule) {
-                    textArea.setPlaceholder('{"Obsidian": "obsidian.md"}');
-                } else {
-                    textArea.setValue(currentValue);
+            const currentValue = this.plugin.settings.rule;
+            if (currentValue.length == 0 || currentValue == DEFAULT_SETTINGS.rule) {
+                textArea.setPlaceholder('{"Obsidian": "obsidian.md"}');
+            } else {
+                textArea.setValue(currentValue);
+            }
+
+            let validate = async (value: string) => {
+                // reset timeoutId
+                this.timeoutId = null;
+
+                console.log('rule JSON: ', value);
+                this.plugin.settings.rule = value;
+                try {
+                    JSON.parse(this.plugin.settings.rule);
+                } catch (error) {
+                    warningItem.descEl.setText('JSON parse error. Please fix your rule.');
+                    console.warn('JSON parse error. Falling back to default setting.');
+                    this.plugin.settings.rule = DEFAULT_SETTINGS.rule;
                 }
+                await this.plugin.saveSettings();
+            }
 
-                let validate = async (value: string) => {
-                    // reset timeoutId
-                    this.timeoutId = null;
-
-                    console.log('rule JSON: ', value);
-                    this.plugin.settings.rule = value;
-                    try {
-                        JSON.parse(this.plugin.settings.rule);
-                    } catch (error) {
-                        warningItem.descEl.setText('JSON parse error. Please fix your rule.');
-                        console.warn('JSON parse error. Falling back to default setting.');
-                        this.plugin.settings.rule = DEFAULT_SETTINGS.rule;
-                    }
-                    await this.plugin.saveSettings();
-                }
-
-                // call validate when textArea becomes out of focus
-                textArea.inputEl.addEventListener('focusout', async (e) => {
-                    warningItem.setDesc('');
-                    await validate(textArea.getValue());
-                });
-
-                return textArea
-                    .onChange(async (value) => {
-                        warningItem.setDesc('');
-
-                        // validate input lazily so that validation
-                        // is not performed while user keeps typing
-                        const LAZY_INTERVAL = 500;  // msec
-                        if (this.timeoutId === null) {
-                            console.log('register new validation');
-                            this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
-                        } else {
-                            console.log('renew validation interval');
-                            clearTimeout(this.timeoutId);
-                            this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
-                        }
-                    });
+            // call validate when textArea becomes out of focus
+            textArea.inputEl.addEventListener('focusout', async (e) => {
+                warningItem.setDesc('');
+                await validate(textArea.getValue());
             });
+
+            return textArea
+                .onChange(async (value) => {
+                    warningItem.setDesc('');
+
+                    // validate input lazily so that validation
+                    // is not performed while user keeps typing
+                    const LAZY_INTERVAL = 500;  // msec
+                    if (this.timeoutId === null) {
+                        console.log('register new validation');
+                        this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
+                    } else {
+                        console.log('renew validation interval');
+                        clearTimeout(this.timeoutId);
+                        this.timeoutId = setTimeout(validate, LAZY_INTERVAL, value);
+                    }
+                });
+        });
     }
 }
