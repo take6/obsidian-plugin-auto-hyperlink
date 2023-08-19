@@ -2,10 +2,12 @@ import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Platform, Pl
 
 
 interface AutoHyperlinkSettings {
+    enableMobile: boolean;
     rule: string;
 }
 
 const DEFAULT_SETTINGS: AutoHyperlinkSettings = {
+    enableMobile: false,
     rule: '[]'
 }
 
@@ -92,11 +94,17 @@ export default class AutoHyperlinkPlugin extends Plugin {
 
         // post processing to insert external link
         this.registerMarkdownPostProcessor((element, context) => {
+            const isMobile = Platform.isMobile;
+            const isEnabledOnMobile = this.settings.enableMobile;
+            if (isMobile && !(isEnabledOnMobile)) {
+                console.log('Feature is disabled on mobile');
+                return;
+            }
+
             console.debug("Processing element", element);
             console.debug("context = ", context);
 
             console.debug(this.settings.rule);
-            console.log('Platform.isMobile = ', Platform.isMobile);
             const rules = JSON.parse(this.settings.rule);
 
             for (const [pattern, urlTemplate] of Object.entries<string>(rules)) {
@@ -148,10 +156,12 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
 
         let toggleItem = new Setting(containerEl)
             .setName('Enable on Mobile')
-            .setDesc('Experimental feature.')
+            .setDesc('Experimental: enable the feature on mobile app.')
             .addToggle((toggle: ToggleComponent) => {
-                toggle.setValue(false);
-                return toggle;
+                toggle.setValue(DEFAULT_SETTINGS.enableMobile);
+                toggle.onChange((value: boolean) => {
+                    this.plugin.settings.enableMobile = value;
+                });
             });
 
         let settingItem = new Setting(containerEl)
