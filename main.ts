@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TextAreaComponent } from 'obsidian';
+import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Platform, Plugin, PluginSettingTab, Setting, TextAreaComponent, ToggleComponent } from 'obsidian';
 
 
 interface AutoHyperlinkSettings {
@@ -96,6 +96,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
             console.debug("context = ", context);
 
             console.debug(this.settings.rule);
+            console.log('Platform.isMobile = ', Platform.isMobile);
             const rules = JSON.parse(this.settings.rule);
 
             for (const [pattern, urlTemplate] of Object.entries<string>(rules)) {
@@ -145,13 +146,21 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
         // only use headings under settings if you have more than one section
 		// containerEl.createEl('h2', {text: 'Setting for AutoHyperlink'});
 
+        let toggleItem = new Setting(containerEl)
+            .setName('Enable on Mobile')
+            .setDesc('Experimental feature.')
+            .addToggle((toggle: ToggleComponent) => {
+                toggle.setValue(false);
+                return toggle;
+            });
+
         let settingItem = new Setting(containerEl)
             .setName('Rule')
             .setDesc(
                 'String must be JSON of "pattern":"urlTemplate" pairs, ' +
                 'where urlTemplate can contain placeholder such as "$0" ' +
                 'to embed matched string into url.'
-            )
+            );
 
         let warningItem = new Setting(containerEl)
             .setDesc('');
