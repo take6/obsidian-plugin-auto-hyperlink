@@ -6,5 +6,5 @@
 	"description": "Insert hyperlink according to user-defined rule",
 	"author": "take6",
 	"authorUrl": "https://github.com/take6",
-	"isDesktopOnly": true
+	"isDesktopOnly": false
 }
