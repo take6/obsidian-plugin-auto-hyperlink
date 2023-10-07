@@ -53,6 +53,10 @@ You can define multiple rules by separating them with comma. Be careful about th
 }
 ```
 
+### Enable Feature on Mobile
+
+There is a toggle to enable/disable feature on mobile environment. The feature is disabled by default because it is still experimental.
+
 ### Example
 
 This section demonstrates how plugin works.
