@@ -158,7 +158,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
             .setName('Enable on Mobile')
             .setDesc('Experimental: enable the feature on mobile app.')
             .addToggle((toggle: ToggleComponent) => {
-                toggle.setValue(DEFAULT_SETTINGS.enableMobile);
+                toggle.setValue(this.plugin.settings.enableMobile);
                 toggle.onChange((value: boolean) => {
                     this.plugin.settings.enableMobile = value;
                 });
