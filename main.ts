@@ -170,7 +170,7 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                 'String must be JSON of "pattern":"urlTemplate" pairs, ' +
                 'where urlTemplate can contain placeholder such as "$0" ' +
                 'to embed matched string into url.'
-            )
+            );
 
         let warningItem = new Setting(containerEl)
             .setDesc('');
