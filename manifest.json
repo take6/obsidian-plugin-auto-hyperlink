@@ -1,7 +1,7 @@
 {
 	"id": "auto-hyperlink",
 	"name": "Auto Hyperlink",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"minAppVersion": "0.15.0",
 	"description": "Insert hyperlink according to user-defined rule",
 	"author": "take6",
