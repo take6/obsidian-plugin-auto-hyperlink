@@ -197,8 +197,8 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                 let w = containerEl.innerWidth;
                 console.log('pxPerCols = ', pxPerCols, ', w = ', w);
                 console.log('pxPerRows = ', pxPerRows, ', h = ', h);
-                textArea.inputEl.rows = Math.floor(h * 0.5 / pxPerRows);
-                textArea.inputEl.cols = Math.floor(w * 0.6 / pxPerCols);
+                textArea.inputEl.rows = Math.floor(h * 0.75 / pxPerRows);
+                textArea.inputEl.cols = Math.floor(w * 0.4 / pxPerCols);
                 console.log('resulting size: ', textArea.inputEl.rows, 'x', textArea.inputEl.cols);
             }
 
