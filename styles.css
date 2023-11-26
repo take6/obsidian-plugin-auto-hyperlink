@@ -10,7 +10,3 @@ If your plugin does not need CSS, delete this file.
 .json-parse-error {
     color:yellow;
 }
-
-.setting-rule {
-    background-color: magenta;
-}

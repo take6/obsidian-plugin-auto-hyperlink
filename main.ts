@@ -171,7 +171,6 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                 'where urlTemplate can contain placeholder such as "$0" ' +
                 'to embed matched string into url.'
             )
-            .setClass('setting-rule');
 
         let warningItem = new Setting(containerEl)
             .setDesc('');
@@ -187,6 +186,20 @@ class AutoHyperlinkSettingTab extends PluginSettingTab {
                 textArea.setPlaceholder('{"Obsidian": "obsidian.md"}');
             } else {
                 textArea.setValue(currentValue);
+            }
+
+            if (!Platform.isMobile) {
+                textArea.inputEl.rows = 10;
+                const pxPerCols = textArea.inputEl.innerWidth / textArea.inputEl.cols;
+                const pxPerRows = textArea.inputEl.innerHeight / textArea.inputEl.rows;
+
+                let h = containerEl.innerHeight;
+                let w = containerEl.innerWidth;
+                console.log('pxPerCols = ', pxPerCols, ', w = ', w);
+                console.log('pxPerRows = ', pxPerRows, ', h = ', h);
+                textArea.inputEl.rows = Math.floor(h * 0.5 / pxPerRows);
+                textArea.inputEl.cols = Math.floor(w * 0.6 / pxPerCols);
+                console.log('resulting size: ', textArea.inputEl.rows, 'x', textArea.inputEl.cols);
             }
 
             let validate = async (value: string) => {
