@@ -1,7 +1,5 @@
 import { assert } from 'console';
 import { App, ButtonComponent, Editor, EditorPosition, MarkdownFileInfo, MarkdownView, Modal, Notice, Platform, Plugin, PluginSettingTab, Setting, TextAreaComponent, ToggleComponent, Workspace } from 'obsidian';
-import { isNumber } from 'util';
-import { isNumberObject } from 'util/types';
 
 
 interface AutoHyperlinkSettings {
