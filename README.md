@@ -2,6 +2,8 @@
 
 This plugin inserts hyperlink into reading view of Obsidian documents according to user-defined rule.
 
+**EXPERIMENTAL:** The plugin has new option to insert hyperlink to editor view. To enable this feature, please enable the option in the setting menu. Note that it directly edits your documents. Since this feature is still experimental, edits could result in unexpected result. 
+
 ### Basic Usage
 
 In the plugin setting pane, you can define hyperlink rule in the form of JSON. Its key should be a pattern that matches the words that you want to insert hyperlink. Corresponding value is a template for URL to be inserted. For example, the following rule will detect every words of "Obsidian" and insert a link to `https://github.com/obsidianmd`, which is almost equivalent to write `[Obsidian](https://github.com/obsidianmd)` in editing mode. If your document contains many "Obsidian"'s, this plugin automatically inserts a link to all of them - no manual linking, no omission.
