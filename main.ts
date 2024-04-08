@@ -140,8 +140,15 @@ export default class AutoHyperlinkPlugin extends Plugin {
 
         let applyX = function(editor: Editor, info: MarkdownView | MarkdownFileInfo) {
             const isEnabledOnEditorMode = this.settings.enableEditorMode;
-            console.log('isEnabledOnEditorMode = ', isEnabledOnEditorMode);
             if (!isEnabledOnEditorMode) {
+                // feature is not enabled
+                return;
+            }
+
+            const isMobile = Platform.isMobile;
+            const isEnabledOnMobile = this.settings.enableMobile;
+            if (isMobile && !isEnabledOnMobile) {
+                // feature is not enabled on mobile environment
                 return;
             }
 
