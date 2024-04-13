@@ -122,23 +122,28 @@ export default class AutoHyperlinkPlugin extends Plugin {
         let applyInProgress = false;
         let applyCurrentRecord = function(editor: Editor, record: MatchRecord) {
             console.log('Current match: ', record.match[0], record.line, record.start, record.length);
+            let cursor = editor.getCursor();
             let lineString = editor.getLine(record.line);
             let isApplied = isPartOfAppliedString(lineString, record);
             console.log('isApplied', isApplied);
             if (!isApplied) { 
                 let applied = applyRuleToLine(lineString, record);
-                console.log('applied = ' + applied);
 
                 applyInProgress = true;
 
                 console.log('Applied: ' + applied);
                 editor.setLine(record.line, applied);
 
+                // restore cursor position
+                if (cursor.line == record.line) {
+                    editor.setCursor(record.line, cursor.ch + applied.length - lineString.length);
+                }
+
                 applyInProgress = false;
             }
         }
 
-        let applyX = function(editor: Editor, info: MarkdownView | MarkdownFileInfo) {
+        let applyInPlace = function(editor: Editor, info: MarkdownView | MarkdownFileInfo) {
             const isEnabledOnEditorMode = this.settings.enableEditorMode;
             if (!isEnabledOnEditorMode) {
                 // feature is not enabled
@@ -152,7 +157,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
                 return;
             }
 
-            console.log('applyX: Line -> ', editor.getLine(editor.getCursor().line));
+            console.log('applyInPlace: Line -> ', editor.getLine(editor.getCursor().line));
             if (applyInProgress) {
                 return;
             }
@@ -210,7 +215,7 @@ export default class AutoHyperlinkPlugin extends Plugin {
             }
         };
 
-        this.app.workspace.on('editor-change', applyX, this);
+        this.app.workspace.on('editor-change', applyInPlace, this);
         // this.app.workspace.on('editor-paste', applyOnPaste);
 
         let applyRule = (node: Node, pattern: string, urlTemplate: string) => {
